@@ -54,9 +54,31 @@ Fund sources that are NOT accepted by IRCC as primary proof:
 Fund sources that ARE acceptable when properly documented:
 - Commercial bank accounts (Afriland First Bank, BICEC, Ecobank, SGBC/Societe Generale Cameroun, UBA Cameroun, etc.).
 - Fixed deposits/term deposits with a bank letter confirming they can be liquidated without restriction.
-- Gifted funds, IF supported by a notarized gift deed AND documentation of the giver's source of funds.
-- Inheritance, IF supported by legal documentation and seasoned in the applicant's bank account.
-- Proceeds from property sale, IF deposited and seasoned in a commercial bank for several months.
+
+GIFTED FUNDS (very common in West African applications - parents, siblings, uncles abroad sending money):
+- Detect when FUND_SOURCE mentions: "gift", "given by", "from my parents/brother/sister/uncle/aunt", "family support", "inheritance", or names a family member.
+- REQUIRED documents for gifted funds to be accepted by IRCC:
+  1. Notarized gift deed (acte de donation notarie) explicitly stating the gift is unconditional and non-repayable.
+  2. The giver's own bank statement showing the source of the gifted funds (IRCC must verify the money is not itself borrowed or laundered).
+  3. The giver's signed letter of explanation confirming the gift and their relationship to the applicant.
+  4. Proof of the transfer itself (SWIFT confirmation, wire transfer receipt, bank deposit slip).
+  5. The funds must be deposited in the applicant's commercial bank account and ideally seasoned for several months before application.
+- Flag explicitly that a verbal gift or unwritten family arrangement is NOT acceptable, no matter how legitimate locally.
+
+PROPERTY SALE PROCEEDS (common in Cameroon - land, family houses, plots):
+- Detect when FUND_SOURCE mentions: "sold", "property sale", "sold my house/land/plot/terrain", "real estate", or describes a one-time large lump sum.
+- REQUIRED documents for property-sale proceeds to be accepted by IRCC:
+  1. Notarized sale agreement (acte de vente notarie) showing the property, the buyer, the price, and the date.
+  2. Title deed (titre foncier) or property registration document showing the applicant was the legal owner.
+  3. Notarized proof of transfer of ownership to the buyer.
+  4. Buyer's payment proof (bank transfer, cashier's check) showing how the money was paid to the applicant.
+  5. Bank deposit records showing the proceeds entered the applicant's commercial bank account.
+  6. SEASONING REQUIREMENT: the funds should sit in the commercial bank account for at least 3-6 months before application so the 6-month average balance reflects them.
+- Flag large recent deposits (within last 1-2 months of application) without seasoning as a credibility risk - IRCC will scrutinize sudden balance jumps.
+
+INHERITANCE (similar to gifts but with legal estate paperwork):
+- Detect when FUND_SOURCE mentions: "inheritance", "deceased parent/grandparent", "estate".
+- REQUIRED: death certificate of the deceased, notarized succession documents (acte de succession), proof of the applicant's legal entitlement to the inherited amount, bank records of the deposit.
 
 Employment categories (mirror the rewriter prompt - infer from context):
 
