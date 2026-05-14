@@ -63,3 +63,58 @@ export interface RewriteApiRequest {
   annualSalary?: string;
   signerNameAndTitle?: string;
 }
+
+/**
+ * Request body posted to /api/pof-check.
+ * Most fields are optional - the analyzer adapts to whatever is provided.
+ */
+export interface PofCheckRequest {
+  familySize: number;
+  applicantFundsCad?: string;
+  fundSource?: string;
+  fundInstitution?: string;
+  sixMonthAverageKnown?: 'Yes' | 'No' | 'Unknown';
+  employmentType?: string;
+  socialSecurityRegistered?:
+    | 'Yes'
+    | 'No'
+    | 'Unknown'
+    | 'Public sector - acte d integration instead';
+  applicantCountry?: string;
+  applyingUnder?: 'FSWP' | 'FSTP' | 'CEC' | 'Unsure';
+  hasValidJobOffer?: 'Yes' | 'No' | 'Unknown';
+}
+
+/**
+ * The structured JSON we instruct the POF analyzer model to return.
+ */
+export interface GemmaPofResponse {
+  exemption_status: 'exempt' | 'not_exempt' | 'unclear';
+  exemption_explanation: string;
+  pof_status: 'sufficient' | 'insufficient' | 'borderline' | 'cannot_determine';
+  pof_amount_check: string;
+  fund_source_flags: string[];
+  employment_legitimacy_flags: string[];
+  required_documents: string[];
+  recommended_next_steps: string[];
+  regional_context_note: string;
+}
+
+/**
+ * Full response from POST /api/pof-check.
+ */
+export interface PofApiResponse {
+  success: boolean;
+  pof: {
+    familySize: number;
+    requiredPofCad: number;
+    sourceUrl: string;
+    lastUpdated: string;
+  };
+  analysis: GemmaPofResponse;
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+}
