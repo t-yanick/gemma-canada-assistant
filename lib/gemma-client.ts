@@ -7,10 +7,13 @@
 //   home ties checker, etc.) - they reuse this same client.
 // - Gives one place to swap models, tune temperature, or add streaming support
 //   in the future.
+// - Provides automatic retry-once on 5xx errors. Google AI Studio's free tier
+//   occasionally returns transient 500 INTERNAL errors that resolve on retry.
 
 const OPENROUTER_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
 const DEFAULT_MODEL = 'google/gemma-4-31b-it:free';
 const DEFAULT_TEMPERATURE = 0.4;
+const RETRY_DELAY_MS = 1500;
 
 export interface GemmaCallOptions {
   systemPrompt: string;
@@ -28,6 +31,7 @@ export interface GemmaCallResult {
     completion_tokens: number;
     total_tokens: number;
   };
+  retried?: boolean;
 }
 
 export interface GemmaCallError {
@@ -35,30 +39,21 @@ export interface GemmaCallError {
   status: number;
   error: string;
   details?: unknown;
+  retried?: boolean;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
- * Call Gemma via OpenRouter with a system prompt and user message.
- *
- * Returns a discriminated union: `{ ok: true, content }` on success,
- * `{ ok: false, status, error }` on failure. Callers should check `result.ok`
- * before using `result.content`.
- *
- * The API key is read from process.env.OPENROUTER_API_KEY. If missing, returns
- * an error result rather than throwing - lets the caller decide how to surface it.
+ * Single attempt at the OpenRouter call. Pulled out so the retry layer
+ * can invoke it twice without duplicating logic.
  */
-export async function callGemma(
+async function attemptCall(
+  apiKey: string,
   options: GemmaCallOptions
 ): Promise<GemmaCallResult | GemmaCallError> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    return {
-      ok: false,
-      status: 500,
-      error: 'OPENROUTER_API_KEY not configured on the server.',
-    };
-  }
-
   const requestBody: Record<string, unknown> = {
     model: options.model ?? DEFAULT_MODEL,
     messages: [
@@ -116,6 +111,57 @@ export async function callGemma(
       details: String(err),
     };
   }
+}
+
+/**
+ * Whether a failed attempt is worth retrying. 5xx errors and the empty-content
+ * 502 we emit are transient. 4xx (auth, bad request) are not.
+ */
+function shouldRetry(result: GemmaCallError): boolean {
+  return result.status >= 500 && result.status < 600;
+}
+
+/**
+ * Call Gemma via OpenRouter with a system prompt and user message.
+ *
+ * On 5xx errors, retries once after a short delay. Returns a discriminated
+ * union: `{ ok: true, content }` on success, `{ ok: false, status, error }`
+ * on failure. Callers should check `result.ok` before using `result.content`.
+ *
+ * The API key is read from process.env.OPENROUTER_API_KEY. If missing, returns
+ * an error result rather than throwing - lets the caller decide how to surface it.
+ */
+export async function callGemma(
+  options: GemmaCallOptions
+): Promise<GemmaCallResult | GemmaCallError> {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    return {
+      ok: false,
+      status: 500,
+      error: 'OPENROUTER_API_KEY not configured on the server.',
+    };
+  }
+
+  const firstAttempt = await attemptCall(apiKey, options);
+
+  if (firstAttempt.ok) {
+    return firstAttempt;
+  }
+
+  if (!shouldRetry(firstAttempt)) {
+    return firstAttempt;
+  }
+
+  // Transient upstream error - wait briefly and try once more.
+  await sleep(RETRY_DELAY_MS);
+  const secondAttempt = await attemptCall(apiKey, options);
+
+  if (secondAttempt.ok) {
+    return { ...secondAttempt, retried: true };
+  }
+
+  return { ...secondAttempt, retried: true };
 }
 
 /**
