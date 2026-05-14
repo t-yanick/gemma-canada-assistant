@@ -51,6 +51,31 @@ Fund sources that are NOT accepted by IRCC as primary proof:
 - Real estate equity, property valuations.
 - Pension fund or retirement balances that cannot be liquidated.
 
+THE MICROFINANCE-WITH-COMMERCIAL-BANK-INTERMEDIARY WORKAROUND (common in Cameroon, frequently refused):
+Some applicants hold funds in a microfinance (e.g., Norton Financial Corporation, Express Union, MC2, COOPEC), and the microfinance itself banks with a commercial bank (e.g., UBA, Afriland, BICEC, Ecobank). These applicants try to argue funds are transferable internationally because the microfinance's commercial bank account provides that pathway. Typical documents submitted:
+- Bank statements and bank letters on MICROFINANCE letterhead.
+- An attestation from the COMMERCIAL BANK confirming that the microfinance holds an account with them.
+- A letter from the microfinance stating the funds are transferable via their commercial bank account, with the commercial bank's IBAN listed.
+
+CRITICAL REFUSAL PATTERNS observed in actual IRCC decisions for this setup:
+- IRCC officers frequently REFUSE applications with this setup, stating they are not satisfied the funds are transferable.
+- A common officer reasoning: the SWIFT code on the bank documents corresponds to the commercial bank (e.g., UNAFCMCX = UBA Cameroon), not to the microfinance whose name is on the letterhead. The officer concludes the funds are not legally the applicant's at a commercial bank - they are the applicant's at a microfinance, which is itself at a commercial bank. The chain is one degree too removed.
+- Acceptance is inconsistent and depends heavily on officer discretion. Some applicants succeed with this approach, but many do not.
+
+When the analyzer detects this workaround (FUND_INSTITUTION mentions microfinance AND the applicant indicates funds are routed through a commercial bank), flag the following in fund_source_flags:
+1. Acknowledge the workaround exists and that some applicants succeed with it.
+2. Warn that IRCC officers commonly refuse on the ground that funds at a microfinance are not equivalent to funds at a commercial bank, regardless of the microfinance's own banking relationships.
+3. Warn that a SWIFT-code-vs-letterhead mismatch (commercial bank SWIFT on microfinance letterhead) is a known refusal trigger - officers notice this immediately.
+4. Recommend the safer alternative: open a personal account at the commercial bank directly, transfer funds there, and season for several months before applying.
+
+PAYSLIP-VS-BANK-DEPOSIT CONSISTENCY (a less-known refusal pattern):
+IRCC officers cross-reference payslips against bank statements. If payslips claim a monthly salary of X but the applicant's bank statements show no corresponding deposits, the officer concludes the employment evidence is inconsistent and may refuse the work experience claim entirely. When the analyzer detects:
+- EMPLOYMENT_TYPE indicates salaried/payslips, AND
+- FUND_INSTITUTION is a savings account distinct from any mentioned salary-receiving account, AND
+- The applicant has not described how salary deposits flow to the funds account,
+
+flag in employment_legitimacy_flags: "Ensure your bank statements (for whichever account is your POF) show clear deposits matching your payslip amounts, OR provide bank statements from a separate salary-receiving account showing those deposits AND a clear transfer trail to your POF account. IRCC officers cross-reference payslips against bank statements - mismatches lead to refusal."
+
 Fund sources that ARE acceptable when properly documented:
 - Commercial bank accounts (Afriland First Bank, BICEC, Ecobank, SGBC/Societe Generale Cameroun, UBA Cameroun, etc.).
 - Fixed deposits/term deposits with a bank letter confirming they can be liquidated without restriction.
