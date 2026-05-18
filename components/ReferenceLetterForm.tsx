@@ -8,6 +8,7 @@
 
 import { useState } from 'react';
 import type { RewriteApiRequest } from '@/lib/types';
+import { listAvailableNocCodes } from '@/lib/noc-data';
 
 interface Props {
   loading: boolean;
@@ -62,8 +63,8 @@ export function ReferenceLetterForm({ loading, onSubmit }: Props) {
             NOC 2021 code
           </label>
           <p className="text-xs text-slate-500 mt-1">
-            Currently supported: 41220 (Secondary school teachers), 31301
-            (Registered nurses), 21232 (Software developers).
+            Supports 12 NOC 2021 occupations across education, health,
+            engineering, IT, finance and HR.
           </p>
           <select
             id="noc"
@@ -71,9 +72,11 @@ export function ReferenceLetterForm({ loading, onSubmit }: Props) {
             onChange={(e) => setNocCode(e.target.value)}
             className={inputClass + ' bg-white'}
           >
-            <option value="41220">41220 - Secondary school teachers</option>
-            <option value="31301">31301 - Registered nurses and psychiatric nurses</option>
-            <option value="21232">21232 - Software developers and programmers</option>
+            {listAvailableNocCodes().map((noc) => (
+              <option key={noc.code} value={noc.code}>
+                {noc.code} - {noc.title}
+              </option>
+            ))}
           </select>
         </div>
 
