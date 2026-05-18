@@ -118,3 +118,66 @@ export interface PofApiResponse {
     total_tokens: number;
   };
 }
+
+/**
+ * Request body posted to /api/visitor-visa.
+ */
+export interface VisitorVisaRequest {
+  purposeOfVisit:
+    | 'family'
+    | 'business'
+    | 'tourism'
+    | 'artist tour'
+    | 'religious'
+    | 'other';
+  purposeDetails?: string;
+  employmentStatus?:
+    | 'employed'
+    | 'business owner'
+    | 'student'
+    | 'retired'
+    | 'unemployed'
+    | 'mixed';
+  employmentDetails?: string;
+  familyInHomeCountry?: string;
+  familyInCanada?: string;
+  propertyOwnership?: 'owns home' | 'owns land' | 'rents' | 'none';
+  previousTravel?: string;
+  tripDurationDays?: string;
+  applicantCountry?: string;
+}
+
+/**
+ * A single home-tie entry in the visitor visa analysis.
+ */
+export interface TieInventoryItem {
+  category: 'Employment' | 'Family' | 'Property' | 'Financial' | 'Travel history';
+  current_strength: 'strong' | 'moderate' | 'weak' | 'missing';
+  what_to_provide: string;
+  rationale: string;
+}
+
+/**
+ * The structured JSON we instruct the visitor visa analyzer model to return.
+ */
+export interface GemmaVisitorVisaResponse {
+  home_ties_strength: 'strong' | 'moderate' | 'weak';
+  strength_explanation: string;
+  ties_inventory: TieInventoryItem[];
+  purpose_credibility_flags: string[];
+  recommended_documents: string[];
+  regional_context_note: string;
+}
+
+/**
+ * Full response from POST /api/visitor-visa.
+ */
+export interface VisitorVisaApiResponse {
+  success: boolean;
+  analysis: GemmaVisitorVisaResponse;
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+}
