@@ -53,9 +53,10 @@ export default function PofPage() {
     <div className="min-h-screen bg-slate-50">
       <SiteHeader />
       <main className="max-w-3xl mx-auto px-4 py-8 sm:px-6">
-        <nav className="mb-6 flex gap-2">
+        <nav className="mb-6 flex flex-wrap gap-2">
           <Link href="/" className="text-sm font-medium px-3 py-1.5 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-100 transition-colors">Reference letter</Link>
           <Link href="/pof" className="text-sm font-medium px-3 py-1.5 rounded-md border border-red-600 bg-red-600 text-white">Proof of funds</Link>
+          <Link href="/visitor-visa" className="text-sm font-medium px-3 py-1.5 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-100 transition-colors">Visitor visa</Link>
         </nav>
         <section className="mb-6">
           <h2 className="text-lg font-semibold text-slate-900">Check your proof of funds and employment legitimacy</h2>
